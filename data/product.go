@@ -1,6 +1,10 @@
 package data
 
-import "time"
+import (
+	"encoding/json"
+	"io"
+	"time"
+)
 
 type Product struct {
 	Name        string  `json:"name,omitempty"`
@@ -31,6 +35,28 @@ var ProductList = []*Product{
 	},
 }
 
-func GetProducts() []*Product {
+type Products []*Product
+
+func GetProducts() Products {
 	return ProductList
+}
+
+func (p *Products) ToJSON(w io.Writer) error {
+	en := json.NewEncoder(w)
+	return en.Encode(p)
+}
+
+func (p *Product) FromJSON(r io.Reader) error {
+	de := json.NewDecoder(r)
+	return de.Decode(p)
+}
+
+func AddProduct(p *Product) {
+	p.ID = getNextID()
+	ProductList = append(ProductList, p)
+}
+
+func getNextID() int {
+	lp := ProductList[len(ProductList)-1]
+	return lp.ID + 1
 }

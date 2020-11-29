@@ -1,0 +1,2 @@
+curl localhost:9090/products -d '{"name":"Milk Tea", "description": "Lassi", "sku":"561", "price": 2.5}'
+curl localhost:9090/products -d '{"name":"tea", "description": "Garam chai", "sku":"231", "price": 2.0}'
