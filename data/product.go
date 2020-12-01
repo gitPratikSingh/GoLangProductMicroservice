@@ -35,6 +35,8 @@ var ProductList = []*Product{
 	},
 }
 
+// List of products in the system
+// swagger:response ProductResponse
 type Products []*Product
 
 func GetProducts() Products {

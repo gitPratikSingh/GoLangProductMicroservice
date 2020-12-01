@@ -1,0 +1,62 @@
+basePath: /v1
+consumes:
+- application/json
+definitions:
+  Product:
+    properties:
+      description:
+        type: string
+        x-go-name: Description
+      id:
+        format: int64
+        type: integer
+        x-go-name: ID
+      name:
+        type: string
+        x-go-name: Name
+      price:
+        format: float
+        type: number
+        x-go-name: Price
+      sku:
+        type: string
+        x-go-name: SKU
+    type: object
+    x-go-package: github.com/singhpratik/microservice/data
+host: localhost
+info:
+  contact:
+    email: john.doe@example.com
+    name: John Doe
+    url: http://john.doe.com
+  description: |-
+    the purpose of this application is to provide an application
+    that is using plain go code to define an API
+  license:
+    name: MIT
+    url: http://opensource.org/licenses/MIT
+  title: Product API.
+  version: 0.0.1
+paths:
+  /products:
+    get:
+      description: returns a list of products
+      operationId: listProducts
+      responses:
+        "200":
+          $ref: '#/responses/ProductResponse'
+      tags:
+      - prodcuts
+produces:
+- application/json
+responses:
+  ProductResponse:
+    description: List of products in the system
+    schema:
+      items:
+        $ref: '#/definitions/Product'
+      type: array
+schemes:
+- http
+- https
+swagger: "2.0"

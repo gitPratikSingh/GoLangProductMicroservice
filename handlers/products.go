@@ -1,3 +1,21 @@
+// Package classification Product API.
+//
+// the purpose of this application is to provide an application
+// that is using plain go code to define an API
+//
+//     Schemes: http, https
+//     Host: localhost
+//     BasePath: /v1
+//     Version: 0.0.1
+//     License: MIT http://opensource.org/licenses/MIT
+//     Contact: John Doe<john.doe@example.com> http://john.doe.com
+//
+//     Consumes:
+//     - application/json
+//
+//     Produces:
+//     - application/json
+// swagger:meta
 package handlers
 
 import (
@@ -27,6 +45,12 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 }
 
+// swagger:route GET /products prodcuts listProducts
+// returns a list of products
+// responses:
+// 	200: ProductResponse
+
+// getProduct returns the list of all products in the data store
 func (p *Products) getProducts(w http.ResponseWriter) {
 	p.l.Println("Handle GET Products")
 	d := data.GetProducts()
