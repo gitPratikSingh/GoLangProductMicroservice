@@ -54,6 +54,7 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (p *Products) getProducts(w http.ResponseWriter) {
 	p.l.Println("Handle GET Products")
 	d := data.GetProducts()
+	w.Header().Add("Content-Type", "application/json")
 	err := d.ToJSON(w)
 	if err != nil {
 		p.l.Fatal(err)
