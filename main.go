@@ -4,12 +4,17 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/hashicorp/go-hclog"
+	protos "github.com/singhpratik/microservice/grpc/currency"
 	"github.com/singhpratik/microservice/handlers"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -39,9 +44,28 @@ func main() {
 	signal.Notify(sigChan, os.Kill)
 	signal.Notify(sigChan, os.Interrupt)
 
+	go func() {
+		setUpGoServer()
+	}()
+
 	sig := <-sigChan
 	l.Printf("Received signal %s to terminate. trying to shutdown gracefully", sig)
 	tc, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	s.Shutdown(tc)
+}
+
+func setUpGoServer() error {
+	hl := hclog.Default()
+	gs := grpc.NewServer()
+	cs := handlers.NewCurrency(hl)
+	protos.RegisterCurrencyServer(gs, cs)
+	ls, err := net.Listen("tcp", ":8090")
+	if err != nil {
+		hl.Info("Unable to get port 8090", err)
+		return err
+	}
+	reflection.Register(gs)
+	hl.Info("Running GRPC server")
+	return gs.Serve(ls)
 }
