@@ -19,18 +19,21 @@
 package handlers
 
 import (
+	"context"
 	"log"
 	"net/http"
 
 	"github.com/singhpratik/microservice/data"
+	protos "github.com/singhpratik/microservice/grpc/currency"
 )
 
 type Products struct {
 	l *log.Logger
+	c protos.CurrencyClient
 }
 
-func NewProducts(l *log.Logger) *Products {
-	return &Products{l}
+func NewProducts(l *log.Logger, c protos.CurrencyClient) *Products {
+	return &Products{l, c}
 }
 
 func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +57,23 @@ func (p *Products) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (p *Products) getProducts(w http.ResponseWriter) {
 	p.l.Println("Handle GET Products")
 	d := data.GetProducts()
+	rate, err := p.c.GetRate(context.Background(), &protos.RateRequest{
+		Base:        "USD",
+		Destination: "GRP",
+	})
+	if err != nil {
+		p.l.Fatal(err)
+		http.Error(w, "cannot get exchange rate", http.StatusInternalServerError)
+	}
+
+	p.l.Printf("Rate of exchange %v", rate.Rate)
+
+	for _, v := range d {
+		v.Price = v.Price * rate.Rate
+	}
+
 	w.Header().Add("Content-Type", "application/json")
-	err := d.ToJSON(w)
+	err = d.ToJSON(w)
 	if err != nil {
 		p.l.Fatal(err)
 		http.Error(w, "cannot marshall json", http.StatusInternalServerError)

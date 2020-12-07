@@ -5,6 +5,9 @@ check_install:
 
 check_grpc_install:
 	which protoc || brew install protobuf
-grpc: check_grpc_install
+	GO111MODULE=on go get github.com/golang/protobuf/protoc-gen-go
+
+generate_proto: check_grpc_install
+	PATH="${PATH}:${GOPATH}/go/bin"
 	protoc -I grpc/ grpc/services.proto --go_out=plugins=grpc:grpc/currency
 	

@@ -14,13 +14,23 @@ import (
 	protos "github.com/singhpratik/microservice/grpc/currency"
 	"github.com/singhpratik/microservice/handlers"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
 )
+
+func getGrpcClient(addr string) *grpc.ClientConn {
+	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	if err != nil {
+		panic(err)
+	}
+	return conn
+}
 
 func main() {
 	l := log.New(os.Stdout, "product-api", log.LstdFlags)
 	hh := handlers.NewHello(l)
-	ph := handlers.NewProducts(l)
+	conn := getGrpcClient("localhost:8090")
+	cc := protos.NewCurrencyClient(conn)
+	defer conn.Close()
+	ph := handlers.NewProducts(l, cc)
 	sm := http.NewServeMux()
 	sm.Handle("/", hh)
 	sm.Handle("/products", ph)
@@ -65,7 +75,6 @@ func setUpGoServer() error {
 		hl.Info("Unable to get port 8090", err)
 		return err
 	}
-	reflection.Register(gs)
 	hl.Info("Running GRPC server")
 	return gs.Serve(ls)
 }
